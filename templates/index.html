@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kenteken Checker</title>
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Kenteken Checker</h1>
+        <form action="/check_kenteken" method="POST">
+            <label for="kenteken">Voer je kenteken in:</label>
+            <input type="text" id="kenteken" name="kenteken" placeholder="Bijv. AB123CD" required>
+            <button type="submit">Check Kenteken</button>
+        </form>
+    </div>
+</body>
+</html>

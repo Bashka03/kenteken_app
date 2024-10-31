@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Registreren</title>
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Auto Registreren</h1>
+        <form action="/voeg_auto_toe" method="POST">
+
+            <label for="merk">Kenteken:</label>
+            <input type="text" id="merk" name="kenteken" required>
+
+            <label for="merk">Merk:</label>
+            <input type="text" id="merk" name="merk" required>
+
+            <label for="kleur">Kleur:</label>
+            <input type="text" id="kleur" name="kleur" required>
+
+            <button type="submit">Registreer Auto</button>
+        </form>
+    </div>
+</body>
+</html>
