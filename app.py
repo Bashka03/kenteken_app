@@ -16,17 +16,17 @@ db_config = {
 # Database-verbinding
 def get_db_connection():
     return mysql.connector.connect(**db_config)
-
-# Functie om RDW API aan te roepen
+# Functie om RDW API aan te roepen (zonder streepjes, omdat de RDW API alleen kentekens zonder streepjes accepteert)
 def get_vehicle_data_from_rdw(kenteken):
-    url = "https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken={kenteken}"
+    kenteken_api_format = kenteken.replace("-", "").upper()
+    url = f"https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken={kenteken_api_format}"
     response = requests.get(url)
     
     if response.status_code == 200 and response.json():
         data = response.json()[0]
         # Alleen de benodigde gegevens selecteren
         return {
-            'kenteken': data.get('kenteken', '').upper(),
+            'kenteken': kenteken,
             'merk': data.get('merk', 'Onbekend'),
             'kleur': data.get('eerste_kleur', 'Onbekend')
         }
@@ -38,7 +38,7 @@ def index():
 
 @app.route('/check_kenteken', methods=['POST'])
 def check_kenteken():
-    kenteken = request.form.get('kenteken').replace("-", "").upper()
+    kenteken = request.form.get('kenteken').upper()
 
     if not kenteken:
         return jsonify({'error': 'Voer een kenteken in'}), 400
@@ -60,7 +60,7 @@ def check_kenteken():
         vehicle_data = get_vehicle_data_from_rdw(kenteken)
         if vehicle_data:
             try:
-                # Voeg kenteken, merk en kleur toe aan de database
+                # Voeg kenteken, merk en kleur toe aan de database, inclusief streepjes in het kenteken
                 cursor.execute(
                     "INSERT INTO kentekens (kenteken, merk, kleur) VALUES (%s, %s, %s)",
                     (vehicle_data['kenteken'], vehicle_data['merk'], vehicle_data['kleur'])
