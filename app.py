@@ -1,84 +1,45 @@
-from flask import Flask, request, render_template, redirect, url_for, jsonify
-import mysql.connector
-import requests
+from flask import Flask
+from routes import app_routes
+import threading
+import time
+from datetime import datetime
+import sys
+import os
+import subprocess  # Om backup.py uit te voeren
+from auth import auth
+
+
 
 app = Flask(__name__)
+app.secret_key = 'geheim'
 
 
-# Configuratie voor MySQL-verbinding
-db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'password',
-    'database': 'kenteken_db'
-}
+# Register routes from routes.py
+app.register_blueprint(app_routes)
+app.register_blueprint(auth, url_prefix='/auth')  # Auth routes onder /auth
 
-# Database-verbinding
-def get_db_connection():
-    return mysql.connector.connect(**db_config)
-# Functie om RDW API aan te roepen (zonder streepjes, omdat de RDW API alleen kentekens zonder streepjes accepteert)
-def get_vehicle_data_from_rdw(kenteken):
-    kenteken_api_format = kenteken.replace("-", "").upper()
-    url = f"https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken={kenteken_api_format}"
-    response = requests.get(url)
-    
-    if response.status_code == 200 and response.json():
-        data = response.json()[0]
-        # Alleen de benodigde gegevens selecteren
-        return {
-            'kenteken': kenteken,
-            'merk': data.get('merk', 'Onbekend'),
-            'kleur': data.get('eerste_kleur', 'Onbekend')
-        }
-    return None
+# Functie om backup.py handmatig en dagelijks om 11:00 uur uit te voeren
+def start_daily_backup():
+    # Volledige pad naar het backup.py script
+    backup_script = os.path.join(os.path.dirname(__file__), 'backup.py')
+    # Start de eerste back-up meteen bij het opstarten
+    subprocess.run([sys.executable, backup_script])
+    print("Back-up bij opstarten voltooid.")
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/check_kenteken', methods=['POST'])
-def check_kenteken():
-    kenteken = request.form.get('kenteken').upper()
-
-    if not kenteken:
-        return jsonify({'error': 'Voer een kenteken in'}), 400
-
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
-
-    # Controleer of kenteken al in de database bestaat
-    cursor.execute("SELECT * FROM kentekens WHERE kenteken = %s", (kenteken,))
-    result = cursor.fetchone()
-
-    if result:
-        # Kenteken gevonden in database, toon de gegevens
-        cursor.close()
-        connection.close()
-        return render_template('result.html', kenteken_data=result, gevonden=True)
-    else:
-        # Kenteken niet gevonden, haal gegevens op van de RDW API
-        vehicle_data = get_vehicle_data_from_rdw(kenteken)
-        if vehicle_data:
-            try:
-                # Voeg kenteken, merk en kleur toe aan de database, inclusief streepjes in het kenteken
-                cursor.execute(
-                    "INSERT INTO kentekens (kenteken, merk, kleur) VALUES (%s, %s, %s)",
-                    (vehicle_data['kenteken'], vehicle_data['merk'], vehicle_data['kleur'])
-                )
-                connection.commit()
-                cursor.close()
-                connection.close()
-                # Toon de nieuw geregistreerde gegevens
-                return render_template('result.html', kenteken_data=vehicle_data, gevonden=True)
-            except mysql.connector.Error as err:
-                cursor.close()
-                connection.close()
-                return jsonify({'error': str(err)}), 500
+    # Wacht tot dagelijks 11:00 voor de volgende back-up
+    while True:
+        now = datetime.now()
+        if now.hour == 11 and now.minute == 00:  # Controleer of het 11:00 is
+            subprocess.run([sys.executable, backup_script])
+            print("Dagelijkse back-up om 11:00 voltooid.")
+            time.sleep(60)  # Wacht een minuut om te voorkomen dat de back-up meerdere keren binnen het uur draait
         else:
-            # Geen gegevens gevonden bij RDW, toon een foutmelding
-            cursor.close()
-            connection.close()
-            return render_template('result.html', kenteken_data={'kenteken': kenteken}, gevonden=False, fout="Kenteken niet gevonden bij RDW")
+            time.sleep(30)  # Controleer elke 30 seconden
+
+# Start een thread voor de dagelijkse back-up functie
+backup_thread = threading.Thread(target=start_daily_backup)
+backup_thread.daemon = True  # Zorgt ervoor dat de thread stopt wanneer de main thread stopt
+backup_thread.start()
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=80, debug=True)

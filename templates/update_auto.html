@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Update{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Auto Bijwerken</h1>
+    
+    <form action="" method="POST">
+        <label for="kenteken">Kenteken:</label>
+        <input type="text" id="kenteken" name="kenteken" value="{{ auto.kenteken }}" readonly>
+
+        <label for="merk">Merk:</label>
+        <input type="text" id="merk" name="merk" value="{{ auto.merk }}" required>
+
+        <label for="kleur">Kleur:</label>
+        <input type="text" id="kleur" name="kleur" value="{{ auto.kleur }}" required>
+
+        <button type="submit">Bijwerken</button>
+        <a href="/dashboard" class="cancel-button">Annuleren</a>
+    </form>
+</div>
+{% endblock %}

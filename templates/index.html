@@ -1,19 +1,27 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kenteken Checker</title>
-    <link rel="stylesheet" href="/static/main.css">
-</head>
-<body>
-    <div class="form-container">
-        <h1>Kenteken Checker</h1>
-        <form action="/check_kenteken" method="POST">
-            <label for="kenteken">Voer je kenteken in:</label>
-            <input type="text" id="kenteken" name="kenteken" placeholder="Bijv. XYZ-XYZ-XYZ" required>
-            <button type="submit">Check Kenteken</button>
-        </form>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Kenteken checker{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Kenteken Checker</h1>
+    <form action="/check_kenteken" method="POST" onsubmit="return validateForm()">
+        <label for="kenteken">Voer het kenteken in:</label>
+        <input type="text" id="kenteken" name="kenteken" required placeholder="Bijv. A1-12-BCD" maxlength="11">
+        <button type="submit">Check Kenteken</button>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function validateForm() {
+        const kenteken = document.getElementById("kenteken").value;
+        const pattern = /^[A-Z0-9]{1,3}-[A-Z0-9]{1,3}-[A-Z0-9]{1,3}$/i;
+        if (!pattern.test(kenteken)) {
+            alert("Voer een geldig kenteken in, bijv. 'A1-12-BCD' of '123-AB-4'.");
+            return false;
+        }
+        return true;
+    }
+</script>
+{% endblock %}

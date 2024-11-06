@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mijn App{% endblock %}</title>
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="/">Home</a>
+            <a href="{{ url_for('app_routes.dashboard') }}">Dashboard</a>
+        </div>
+        <div class="navbar-right">
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('auth.logout') }}">Uitloggen</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}">Inloggen</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+        {% block scripts %}{% endblock %}
+</body>
+</html>

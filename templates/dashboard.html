@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Auto Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Auto Dashboard</h1>
+
+    <h2>Bestaande auto's</h2>
+    <table>
+        <tr>
+            <th>Kenteken</th>
+            <th>Merk</th>
+            <th>Kleur</th>
+            <th>Acties</th>
+        </tr>
+        {% for auto in autos %}
+        <tr>
+            <td>{{ auto.kenteken }}</td>
+            <td>{{ auto.merk }}</td>
+            <td>{{ auto.kleur }}</td>
+            <td>
+                {% if session.get('role') == 'admin' %}
+                <a href="/dashboard/update/{{ auto.kenteken }}">Bewerken</a>
+                <a href="/dashboard/delete/{{ auto.kenteken }}" onclick="return confirm('Weet je zeker dat je deze auto wilt verwijderen?')">Verwijderen</a>
+                {% else %}
+                <span>Geen toegang</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- Paginering -->
+<div class="pagination">
+    {% if prev_page %}
+        <a href="{{ url_for('app_routes.dashboard', page=prev_page) }}">Vorige</a>
+    {% else %}
+        <span>Vorige</span>
+    {% endif %}
+
+    <span>Pagina {{ current_page }} van {{ total_pages }}</span>
+
+    {% if next_page %}
+        <a href="{{ url_for('app_routes.dashboard', page=next_page) }}">Volgende</a>
+    {% else %}
+        <span>Volgende</span>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
