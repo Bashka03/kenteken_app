@@ -35,32 +35,17 @@
 <!-- Paginering -->
 <div class="pagination">
     {% if prev_page %}
-        <a href="{{ url_for('app_routes.dashboard', page=prev_page) }}">Vorige</a>
+        <a class="page-link" href="{{ url_for('app_routes.dashboard', page=prev_page) }}">Vorige</a>
     {% else %}
-        <span>Vorige</span>
+        <span class="page-link disabled">Vorige</span>
     {% endif %}
 
-    <span>Pagina {{ current_page }} van {{ total_pages }}</span>
+    <span class="current-page">Pagina {{ current_page }} van {{ total_pages }}</span>
 
     {% if next_page %}
-        <a href="{{ url_for('app_routes.dashboard', page=next_page) }}">Volgende</a>
+        <a class="page-link" href="{{ url_for('app_routes.dashboard', page=next_page) }}">Volgende</a>
     {% else %}
-        <span>Volgende</span>
+        <span class="page-link disabled">Volgende</span>
     {% endif %}
 </div>
 {% endblock %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-

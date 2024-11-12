@@ -3,6 +3,9 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash,
 from database import (find_kenteken_in_db, add_kenteken_to_db, get_all_autos, update_auto_in_db, delete_auto_from_db)
 from rdw_api import get_vehicle_data_from_rdw
 import re
+from flask_paginate import Pagination, get_page_parameter
+   
+
 
 app_routes = Blueprint('app_routes', __name__)
 
@@ -57,8 +60,29 @@ def check_kenteken():
 @app_routes.route('/dashboard')
 @login_required
 def dashboard():
-    autos = get_all_autos()
-    return render_template('dashboard.html', autos=autos)
+    page = request.args.get('page', 1, type=int)
+    all_autos = get_all_autos()
+    
+    # Calculate total pages
+    total_autos = len(all_autos)
+    total_pages = (total_autos + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
+
+    # Calculate start and limit for slicing
+    start = (page - 1) * ITEMS_PER_PAGE
+    end = start + ITEMS_PER_PAGE
+    
+    # Slice the autos for current page
+    paginated_autos = all_autos[start:end]
+
+    prev_page = page - 1 if page > 1 else None
+    next_page = page + 1 if end < total_autos else None
+
+    return render_template('dashboard.html', 
+                           autos=paginated_autos, 
+                           current_page=page, 
+                           total_pages=total_pages,
+                           prev_page=prev_page, 
+                           next_page=next_page)
 
 @app_routes.route('/dashboard/update/<kenteken>', methods=['GET', 'POST'])
 @login_required
