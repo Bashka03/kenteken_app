@@ -7,7 +7,7 @@ from config import db_config
 
 
 # Path to backup folder
-backup_folder = 'C:/Users/bashi/Documents/kenteken_app/backups/'
+backup_folder = './backups/'
 
 def load_last_backup_time():
     """Load the timestamp of the last backup."""
